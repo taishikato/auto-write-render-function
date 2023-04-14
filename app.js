@@ -14,7 +14,7 @@ const supabaseAdmin = createClient(
 
 const jsonParser = bodyParser.json();
 
-const vectorQueue = new Queue("create an article", process.env.REDIS_URI);
+const vectorQueue = new Queue("create an article", process.env.REDIS_URL);
 
 vectorQueue.process(async (job, done) => {
   const jobData = job.data;
