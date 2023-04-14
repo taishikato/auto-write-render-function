@@ -1,6 +1,5 @@
 const { createClient } = require("@supabase/supabase-js");
 const express = require("express");
-const bodyParser = require("body-parser");
 const asyncHandler = require("express-async-handler");
 const Queue = require("bull");
 const app = express();
@@ -12,7 +11,20 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
-const jsonParser = bodyParser.json();
+const createPayload = (topic) => ({
+  messages: [
+    {
+      role: "user",
+      content: `Please create a simple blog post about ${topic}`,
+    },
+  ],
+  model: "gpt-3.5-turbo",
+  temperature: 0.7,
+  max_tokens: 256,
+  top_p: 1,
+  frequency_penalty: 0,
+  presence_penalty: 0,
+});
 
 const vectorQueue = new Queue("create an article", process.env.REDIS_URL);
 
@@ -32,10 +44,12 @@ vectorQueue.process(async (job, done) => {
     .then((res) => res.json())
     .catch((err) => console.error(err));
 
-  await supabaseAdmin.from("articles").insert({
+  const { error } = await supabaseAdmin.from("articles").insert({
     content: json.choices[0].message.content ?? "Sorry...an error occurred.",
     user_id: userId,
   });
+
+  if (error) console.error(error);
 
   done();
 });
@@ -57,17 +71,17 @@ app.get("/", (req, res, next) => {
 
 app.post(
   "/create-article",
-  jsonParser,
   asyncHandler(async (req, res, next) => {
     console.log("/create-article is called!");
 
-    console.log("req.body", req.body);
+    const { data: topics, error } = await supabaseAdmin
+      .from("topics")
+      .select("content, user_id");
 
-    console.log("Info: Job set");
-    for (const data of req.body) {
+    for (const data of topics) {
       await vectorQueue.add({
-        topic: data.topic,
-        userId: data.userId,
+        topic: data.content,
+        userId: data.user_id,
       });
     }
 
