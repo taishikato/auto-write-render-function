@@ -61,10 +61,8 @@ app.post(
   asyncHandler(async (req, res, next) => {
     console.log("/create-article is called!");
 
-    const { topicsAndUserIds } = req.body;
-
     console.log("Info: Job set");
-    for (const data of topicsAndUserIds) {
+    for (const data of req.body) {
       await vectorQueue.add({
         topic: data.topic,
         userId: data.userId,
