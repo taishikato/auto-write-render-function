@@ -15,11 +15,11 @@ const createPayload = (topic) => ({
   messages: [
     {
       role: "user",
-      content: `Please write a brief blog post in Markdown style on this topic of ${topic}`,
+      content: `Please write a brief blog post in Markdown style on this topic of ${topic}. The title must be unique a bit.`,
     },
   ],
   model: "gpt-3.5-turbo",
-  temperature: 0.7,
+  temperature: 0.8,
   max_tokens: 256,
   top_p: 1,
   frequency_penalty: 0,
