@@ -15,7 +15,7 @@ const createPayload = (topic) => ({
   messages: [
     {
       role: "user",
-      content: `Please create a simple blog post about ${topic}`,
+      content: `Please write a brief blog post in Markdown style on this topic of ${topic}`,
     },
   ],
   model: "gpt-3.5-turbo",
